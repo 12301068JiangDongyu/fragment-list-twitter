@@ -8,6 +8,7 @@ import java.util.Collections;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.FragmentManager;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -26,7 +27,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-public class MainActivity extends Activity
+public class MainActivity extends Activity implements FirstFragment.OnFragmentInteractionListener
 {
    // name of SharedPreferences XML file that stores the saved searches 
    private static final String SEARCHES = "searches";
@@ -58,7 +59,11 @@ public class MainActivity extends Activity
       // create ArrayAdapter and use it to bind tags to the ListView
       adapter = new ArrayAdapter<String>(this, R.layout.list_item, tags);
       // MOVE to ListFragment _ setListAdapter(adapter);
-      
+
+      getFragmentManager()
+                         .beginTransaction()
+                         .add(R.id.fragment_holder, new FirstFragment())
+                         .commit();
       // register listener to save a new or edited search 
       ImageButton saveButton = 
          (ImageButton) findViewById(R.id.saveButton);
@@ -70,6 +75,28 @@ public class MainActivity extends Activity
       // MOVE to ListFragment _  set listener that allows user to delete or edit a search
       //getListView().setOnItemLongClickListener(itemLongClickListener);
    } // end method onCreate
+
+    public void sendTagToFragment2(String tag){
+        // get query string and create a URL representing the search
+
+        String urlString = getString(R.string.searchURL) +Uri.encode(savedSearches.getString(tag, ""), "UTF-8");
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_holder, SecondFragment.newInstance(urlString))
+                .addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void onBackPressed(){
+        FragmentManager fm = getFragmentManager();
+        if(fm.getBackStackEntryCount()>0){
+            fm.popBackStack();
+        }else{
+            super.onBackPressed();
+        }
+
+    }
 
    // NO CHANGES _  saveButtonListener saves a tag-query pair into SharedPreferences
    public OnClickListener saveButtonListener = new OnClickListener() 
